@@ -1,0 +1,69 @@
+function dump(o)
+   if type(o) == 'table' then
+      local s = '{ '
+      for k,v in pairs(o) do
+         if type(k) ~= 'number' then k = '"'..k..'"' end
+         s = s .. '['..k..'] = ' .. dump(v) .. ','
+      end
+      return s .. '} '
+   else
+      return tostring(o)
+   end
+end
+
+
+
+
+
+local QuestieMap = QuestieLoader:ImportModule("QuestieMap")
+local l10n = QuestieLoader:ImportModule("l10n")
+
+local function GetZoneNameById(searchId)
+   for parentIndex, subTable in pairs(l10n.zoneLookup) do
+      if subTable[searchId] then
+         return subTable[searchId]
+      end
+   end
+   return nil
+end
+
+local function GetQuestObjectives(questId)
+   if not QuestieMap.questIdFrames[questId] then
+      print("Keine Kartenmarkierungen für Quest ID: " .. questId)
+      return
+   end
+   
+   for name, frame in pairs(QuestieMap:GetFramesForQuest(questId)) do
+      if frame and frame.data then
+         local x, y = frame.x, frame.y
+         local areaId = frame.AreaID
+         local uiMapId = frame.UiMapID
+         local icon = frame.data.Icon
+         
+         return x, y, areaId, uiMapId, icon
+      end
+   end
+end
+
+function AddCarboniteIcon(uid, zone, x, y, iconPath, tooltip)
+   Nx.MapInitIconType (uid, "WP", iconPath, 16, 16)
+   local icon = Nx.MapAddIconPoint (uid, zone, x, y, iconPath)
+   Nx.MapSetIconTip (icon, tooltip)
+end
+
+
+
+for questId, _ in pairs(QuestieMap.questIdFrames) do
+   x, y, areaId, uiMapId, icon = GetQuestObjectives(questId)
+   zoneName = GetZoneNameById(areaId)
+   l10nZoneName = l10n.translations[zoneName]["deDE"]
+   
+   if (l10nZoneName == "Das Brachland") then
+      l10nZoneName = "Brachland"
+   end
+   
+   print(zoneName)
+   print(string.format("Zone: %s, X: %.2f, Y: %.2f", l10nZoneName, x, y))
+   
+   AddCarboniteIcon("!" .. l10nZoneName .. x .. y, l10nZoneName, x, y, icon, "tooltip text1")
+end
