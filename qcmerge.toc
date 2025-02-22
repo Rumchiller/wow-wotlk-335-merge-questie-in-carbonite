@@ -1,0 +1,9 @@
+## Interface: 30300
+## Title: QCMerge
+## Author: Reginald Leonczuk
+## Notes: Merges Questie Quests into Carbonite Map
+## Version: 1.0.1
+## SavedVariables: QCMerge-Config
+## Dependencies: Questie-335, Carbonite
+
+qcmerge.lua
